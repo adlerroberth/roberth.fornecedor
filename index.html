@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo de Produtos</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<h1>Catálogo de Produtos</h1>
+
+<div class="filtros">
+  <button class="active" onclick="filtrar('todos')">Todos</button>
+  <button onclick="filtrar('scooter')">Scooters</button>
+  <button onclick="filtrar('patinete')">Patinetes</button>
+  <button onclick="filtrar('bicicleta')">Bicicletas</button>
+  <button onclick="filtrar('outros')">Outros</button>
+</div>
+
+<div class="catalogo" id="catalogo"></div>
+
+<script>
+function carregarCatalogo() {
+  const produtos = JSON.parse(localStorage.getItem('produtos') || '[]');
+  const catalogo = document.getElementById('catalogo');
+  catalogo.innerHTML = '';
+
+  produtos.forEach(p => {
+    const esgotado = !p.link || p.link.trim() === '';
+    catalogo.innerHTML += `
+      <a href="${esgotado ? '#' : p.link}" class="produto ${esgotado ? 'produto-esgotado' : ''}" data-categoria="${p.categoria}" ${!esgotado ? 'target="_blank"' : ''}>
+        <img src="${p.imagem}" alt="${p.titulo}">
+        <div class="titulo">${p.titulo}</div>
+        <div class="preco">${p.preco}</div>
+        ${esgotado ? '<div class="esgotado">ESGOTADO</div>' : ''}
+      </a>
+    `;
+  });
+}
+
+function filtrar(categoria) {
+  const produtos = document.querySelectorAll('.produto');
+  const botoes = document.querySelectorAll('.filtros button');
+  botoes.forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+
+  produtos.forEach(produto => {
+    produto.style.display = (categoria === 'todos' || produto.dataset.categoria === categoria) ? 'block' : 'none';
+  });
+}
+
+window.onload = carregarCatalogo;
+</script>
+
+</body>
+</html>

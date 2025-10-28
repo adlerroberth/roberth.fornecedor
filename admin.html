@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Admin - Catálogo</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f7f7f7;
+  margin: 0;
+  padding: 30px;
+}
+.container {
+  max-width: 600px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+input, select, button {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #0056b3;
+}
+.produto {
+  background: #f0f0f0;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.botoes {
+  display: flex;
+  gap: 10px;
+}
+.botoes button {
+  flex: 1;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Adicionar Produto</h2>
+  <input type="text" id="titulo" placeholder="Título do produto">
+  <input type="text" id="preco" placeholder="Preço (ex: R$ 3.500,00)">
+  <input type="text" id="imagem" placeholder="URL da imagem">
+  <input type="text" id="link" placeholder="Link do produto (ou deixe vazio)">
+  <select id="categoria">
+    <option value="patinete">Patinete</option>
+    <option value="scooter">Scooter</option>
+    <option value="bicicleta">Bicicleta</option>
+    <option value="outros">Outros</option>
+  </select>
+  <button id="btnSalvar" onclick="adicionarProduto()">Salvar Produto</button>
+
+  <h3>Produtos Cadastrados</h3>
+  <div id="lista"></div>
+</div>
+
+<script>
+let indiceEdicao = null;
+
+function carregarProdutos() {
+  const produtos = JSON.parse(localStorage.getItem('produtos') || '[]');
+  const lista = document.getElementById('lista');
+  lista.innerHTML = '';
+  produtos.forEach((p, i) => {
+    lista.innerHTML += `
+      <div class="produto">
+        <strong>${p.titulo}</strong><br>
+        ${p.preco}<br>
+        <small>${p.categoria}</small><br>
+        <div class="botoes">
+          <button onclick="editarProduto(${i})">Editar</button>
+          <button onclick="removerProduto(${i})" style="background:#dc3545;">Remover</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function adicionarProduto() {
+  const titulo = document.getElementById('titulo').value.trim();
+  const preco = document.getElementById('preco').value.trim();
+  const imagem = document.getElementById('imagem').value.trim();
+  const link = document.getElementById('link').value.trim();
+  const categoria = document.getElementById('categoria').value;
+
+  if (!titulo || !preco || !imagem) {
+    alert('Preencha todos os campos obrigatórios!');
+    return;
+  }
+
+  const produtos = JSON.parse(localStorage.getItem('produtos') || '[]');
+
+  if (indiceEdicao !== null) {
+    produtos[indiceEdicao] = { titulo, preco, imagem, link, categoria };
+    indiceEdicao = null;
+    document.getElementById('btnSalvar').textContent = 'Salvar Produto';
+    alert('Produto atualizado com sucesso!');
+  } else {
+    produtos.push({ titulo, preco, imagem, link, categoria });
+    alert('Produto adicionado com sucesso!');
+  }
+
+  localStorage.setItem('produtos', JSON.stringify(produtos));
+  carregarProdutos();
+  document.querySelectorAll('input').forEach(i => i.value = '');
+}
+
+function editarProduto(i) {
+  const produtos = JSON.parse(localStorage.getItem('produtos') || '[]');
+  const p = produtos[i];
+  document.getElementById('titulo').value = p.titulo;
+  document.getElementById('preco').value = p.preco;
+  document.getElementById('imagem').value = p.imagem;
+  document.getElementById('link').value = p.link;
+  document.getElementById('categoria').value = p.categoria;
+  indiceEdicao = i;
+  document.getElementById('btnSalvar').textContent = 'Atualizar Produto';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function removerProduto(i) {
+  const produtos = JSON.parse(localStorage.getItem('produtos') || '[]');
+  if (confirm('Tem certeza que deseja remover este produto?')) {
+    produtos.splice(i, 1);
+    localStorage.setItem('produtos', JSON.stringify(produtos));
+    carregarProdutos();
+  }
+}
+
+window.onload = carregarProdutos;
+</script>
+
+</body>
+</html>
