@@ -11,35 +11,40 @@
 <h1>Catálogo de Produtos</h1>
 
 <div class="filtros">
-  <button class="active" onclick="filtrar('todos')">Todos</button>
-  <button onclick="filtrar('scooter')">Scooters</button>
-  <button onclick="filtrar('patinete')">Patinetes</button>
-  <button onclick="filtrar('bicicleta')">Bicicletas</button>
-  <button onclick="filtrar('outros')">Outros</button>
+  <button class="active" onclick="filtrar('todos', event)">Todos</button>
+  <button onclick="filtrar('scooter', event)">Scooters</button>
+  <button onclick="filtrar('patinete', event)">Patinetes</button>
+  <button onclick="filtrar('bicicleta', event)">Bicicletas</button>
+  <button onclick="filtrar('outros', event)">Outros</button>
 </div>
 
 <div class="catalogo" id="catalogo"></div>
 
 <script>
-function carregarCatalogo() {
-  const produtos = JSON.parse(localStorage.getItem('produtos') || '[]');
-  const catalogo = document.getElementById('catalogo');
-  catalogo.innerHTML = '';
+async function carregarCatalogo() {
+  try {
+    const resposta = await fetch('produtos.json');
+    const produtos = await resposta.json();
+    const catalogo = document.getElementById('catalogo');
+    catalogo.innerHTML = '';
 
-  produtos.forEach(p => {
-    const esgotado = !p.link || p.link.trim() === '';
-    catalogo.innerHTML += `
-      <a href="${esgotado ? '#' : p.link}" class="produto ${esgotado ? 'produto-esgotado' : ''}" data-categoria="${p.categoria}" ${!esgotado ? 'target="_blank"' : ''}>
-        <img src="${p.imagem}" alt="${p.titulo}">
-        <div class="titulo">${p.titulo}</div>
-        <div class="preco">${p.preco}</div>
-        ${esgotado ? '<div class="esgotado">ESGOTADO</div>' : ''}
-      </a>
-    `;
-  });
+    produtos.forEach(p => {
+      const esgotado = !p.link || p.link.trim() === '';
+      catalogo.innerHTML += `
+        <a href="${esgotado ? '#' : p.link}" class="produto ${esgotado ? 'produto-esgotado' : ''}" data-categoria="${p.categoria}" ${!esgotado ? 'target="_blank"' : ''}>
+          <img src="${p.imagem}" alt="${p.titulo}">
+          <div class="titulo">${p.titulo}</div>
+          <div class="preco">${p.preco}</div>
+          ${esgotado ? '<div class="esgotado">ESGOTADO</div>' : ''}
+        </a>
+      `;
+    });
+  } catch (erro) {
+    console.error('Erro ao carregar produtos:', erro);
+  }
 }
 
-function filtrar(categoria) {
+function filtrar(categoria, event) {
   const produtos = document.querySelectorAll('.produto');
   const botoes = document.querySelectorAll('.filtros button');
   botoes.forEach(btn => btn.classList.remove('active'));
