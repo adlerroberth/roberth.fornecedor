@@ -49,6 +49,13 @@ button:hover {
 .botoes button {
   flex: 1;
 }
+#btnExportar {
+  background-color: #28a745;
+}
+#btnImportar {
+  background-color: #ffc107;
+  color: black;
+}
 </style>
 </head>
 <body>
@@ -69,6 +76,11 @@ button:hover {
 
   <h3>Produtos Cadastrados</h3>
   <div id="lista"></div>
+
+  <hr>
+  <button id="btnExportar" onclick="exportarJSON()">Exportar produtos (JSON)</button>
+  <button id="btnImportar" onclick="document.getElementById('importarArquivo').click()">Importar produtos (JSON)</button>
+  <input type="file" id="importarArquivo" accept=".json" style="display:none" onchange="importarJSON(event)">
 </div>
 
 <script>
@@ -142,6 +154,27 @@ function removerProduto(i) {
     localStorage.setItem('produtos', JSON.stringify(produtos));
     carregarProdutos();
   }
+}
+
+function exportarJSON() {
+  const produtos = localStorage.getItem('produtos') || '[]';
+  const blob = new Blob([produtos], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'produtos.json';
+  link.click();
+}
+
+function importarJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    localStorage.setItem('produtos', e.target.result);
+    carregarProdutos();
+    alert('Produtos importados com sucesso!');
+  };
+  reader.readAsText(file);
 }
 
 window.onload = carregarProdutos;
